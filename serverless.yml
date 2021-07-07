@@ -1,0 +1,25 @@
+service:
+  name: usrv-auction
+# this plugins are for using with weback and javascript
+plugins:
+  - serverless-bundle
+  - serverless-pseudo-parameters
+
+#this contains the information about the provider in this case
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 256
+  stage: ${opt:stage, 'dev'}
+# $ is to reference variables if stage is undefiende use dev
+functions:
+  hello:
+    handler: src/handlers/hello.handler
+    events:
+      - http:
+          method: GET
+          path: /hello
+#create a custom object
+custom:
+  bundle:
+    linting: true
