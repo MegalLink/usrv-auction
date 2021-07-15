@@ -1,5 +1,5 @@
 service:
-  name: usrv-auction
+  name: usrv-heros
 # this plugins are for using with weback and javascript
 plugins:
   - serverless-bundle
@@ -11,15 +11,16 @@ provider:
   runtime: nodejs12.x
   memorySize: 256
   stage: ${opt:stage, 'dev'}
+  region: sa-east-1
 # $ is to reference variables if stage is undefiende use dev
 functions:
-  hello:
-    handler: src/handlers/hello.handler
+  createHero:
+    handler: src/handlers/createHero.handler
     events:
       - http:
-          method: GET
-          path: /hello
+          method: POST
+          path: /hero
 #create a custom object
 custom:
   bundle:
-    linting: true
+    linting: false
