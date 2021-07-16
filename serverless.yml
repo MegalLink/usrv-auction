@@ -13,6 +13,20 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: sa-east-1
 # $ is to reference variables if stage is undefiende use dev
+resources:
+  Resources:
+    HerosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: HerosTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+  # With Key Schema i'm telling My Attribute id is the key and it is a HASH from string
 functions:
   createHero:
     handler: src/handlers/createHero.handler
