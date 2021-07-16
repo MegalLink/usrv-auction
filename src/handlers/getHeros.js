@@ -1,4 +1,3 @@
-import { v4 as uuid } from "uuid";
 import AWS from "aws-sdk";
 import middy from "@middy/core";
 import httpJsonBodyParser from "@middy/http-json-body-parser";
@@ -8,37 +7,25 @@ import createError from "http-errors";
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-async function createHero(event, context) {
-  //Event and lambda is provided by AWS when lambda is called
-  const { heroName, superPower } = event.body;
-  const now = new Date();
-  const hero = {
-    id: uuid(),
-    heroName,
-    superPower,
-    status: "OPEN",
-    createdAt: now.toISOString(),
-  };
-  console.log(hero);
+async function getHeros(event, context) {
+  let heros;
   try {
-    await dynamodb
-      .put({
-        TableName: process.env.HEROS_TABLE_NAME,
-        Item: hero,
-      })
+    const result = await dynamodb
+      .scan({ TableName: process.env.HEROS_TABLE_NAME })
       .promise();
+    heros = result.Items;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw new createError.InternalServerError(error);
   }
 
   return {
-    statusCode: 201,
-    body: JSON.stringify(hero),
+    statusCode: 200,
+    body: JSON.stringify(heros),
   };
 }
 
-export const handler = middy(createHero)
+export const handler = middy(getHeros)
   .use(httpJsonBodyParser()) //gets the body from the event and converts the body into an object
   .use(httpEventNormalizer()) // Normalizes HTTP events by adding an empty object for queryStringParameters
   .use(httpErrorHandler()); //Creates a proper HTTP response for errors that are created with the http-errors module and represents proper HTTP errors
