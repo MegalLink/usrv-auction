@@ -34,9 +34,23 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
+          - AttributeName: status
+            AttributeType: S
+          - AttributeName: endingAt
+            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: statusAndEndDate
+            KeySchema:
+              - AttributeName: status
+                KeyType: HASH
+              - AttributeName: endingAt
+                KeyType: RANGE
+            Projection: #Dynamo create a virutal copy of the table an use ALL the atributes on the table
+              ProjectionType: ALL
+
   # With Key Schema i'm telling My Attribute id is the key and it is a HASH from string
 functions:
   createHero:
@@ -63,6 +77,11 @@ functions:
       - http:
           method: PATCH
           path: /hero/{id}/imageUrl
+  scheduleHeroDead:
+    handler: src/handlers/scheduleHeroDead.handler
+  #  events:
+  #    - schedule: rate(1 minute)
+
 #create a custom object with !Ref i make a reference to
 #Ref can be used with parameters or resources in this case the resource HerosTable and it returns the phisycalID
 #With GettAtt we can access to Attributes

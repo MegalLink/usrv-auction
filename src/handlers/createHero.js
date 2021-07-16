@@ -9,13 +9,17 @@ async function createHero(event, context) {
   //Event and lambda is provided by AWS when lambda is called
   const { heroName, superPower } = event.body;
   const now = new Date();
+  const endDate = new Date();
+  endDate.setHours(now.getHours() + 1);
   const hero = {
     id: uuid(),
     heroName,
     superPower,
     imageUrl: "https://i.stack.imgur.com/l60Hf.png",
     status: "OPEN",
+    isAlive: true,
     createdAt: now.toISOString(),
+    endDate: endDate.toISOString(),
   };
   console.log(hero);
   try {
