@@ -17,7 +17,7 @@ async function createHero(event, context) {
 
   await dynamodb
     .put({
-      TableName: "HerosTable",
+      TableName: process.env.HEROS_TABLE_NAME,
       Item: hero,
     })
     .promise();

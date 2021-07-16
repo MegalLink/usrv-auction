@@ -12,19 +12,21 @@ provider:
   memorySize: 256
   stage: ${opt:stage, 'dev'}
   region: sa-east-1
+  environment:
+    HEROS_TABLE_NAME: ${self:custom.HerosTable.name}
   iamRoleStatements:
     - Effect: Allow
       Action:
         - dynamodb:PutItem
       Resource:
-        - arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:table/HerosTable
+        - ${self:custom.HerosTable.arn}
 
 resources:
   Resources:
     HerosTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: HerosTable
+        TableName: HerosTable-${self:provider.stage}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: id
@@ -40,7 +42,12 @@ functions:
       - http:
           method: POST
           path: /hero
-#create a custom object
+#create a custom object with !Ref i make a reference to
+#Ref can be used with parameters or resources in this case the resource HerosTable and it returns the phisycalID
+#With GettAtt we can access to Attributes
 custom:
+  HerosTable:
+    name: !Ref HerosTable
+    arn: !GetAtt HerosTable.Arn
   bundle:
     linting: false
