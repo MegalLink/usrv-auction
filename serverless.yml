@@ -34,51 +34,51 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
-          - AttributeName: status
-            AttributeType: S
-          - AttributeName: endingAt
-            AttributeType: S
+          # - AttributeName: status
+          #   AttributeType: S
+          # - AttributeName: endingAt
+          #   AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-        GlobalSecondaryIndexes:
-          - IndexName: statusAndEndDate
-            KeySchema:
-              - AttributeName: status
-                KeyType: HASH
-              - AttributeName: endingAt
-                KeyType: RANGE
-            Projection: #Dynamo create a virutal copy of the table an use ALL the atributes on the table
-              ProjectionType: ALL
+        # GlobalSecondaryIndexes:
+        #   - IndexName: statusAndEndDate
+        #     KeySchema:
+        #       - AttributeName: status
+        #         KeyType: HASH
+        #       - AttributeName: endingAt
+        #         KeyType: RANGE
+        #     Projection: #Dynamo create a virutal copy of the table an use ALL the atributes on the table
+        #       ProjectionType: ALL
 
   # With Key Schema i'm telling My Attribute id is the key and it is a HASH from string
 functions:
   createHero:
-    handler: src/handlers/createHero.handler
+    handler: src/handlers/CreateHeroHandler.handler
     events:
       - http:
           method: POST
           path: /hero
   getHeros:
-    handler: src/handlers/getHeros.handler
+    handler: src/handlers/GetHerosHandler.handler
     events:
       - http:
           method: GET
           path: /heros
   getHero:
-    handler: src/handlers/getHero.handler
+    handler: src/handlers/GetHeroHandler.handler
     events:
       - http:
           method: GET
           path: /hero/{id}
   patchImageHero:
-    handler: src/handlers/patchImageHero.handler
+    handler: src/handlers/PatchImageHeroHandler.handler
     events:
       - http:
           method: PATCH
           path: /hero/{id}/imageUrl
   scheduleHeroDead:
-    handler: src/handlers/scheduleHeroDead.handler
+    handler: src/handlers/ScheduleHeroDeadHandler.handler
   #  events:
   #    - schedule: rate(1 minute)
 
