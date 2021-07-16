@@ -13,6 +13,7 @@ async function createHero(event, context) {
     id: uuid(),
     heroName,
     superPower,
+    imageUrl: "https://i.stack.imgur.com/l60Hf.png",
     status: "OPEN",
     createdAt: now.toISOString(),
   };
