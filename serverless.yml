@@ -12,7 +12,13 @@ provider:
   memorySize: 256
   stage: ${opt:stage, 'dev'}
   region: sa-east-1
-# $ is to reference variables if stage is undefiende use dev
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+      Resource:
+        - arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:table/HerosTable
+
 resources:
   Resources:
     HerosTable:
