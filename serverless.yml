@@ -21,9 +21,15 @@ provider:
         - dynamodb:Scan
         - dynamodb:GetItem
         - dynamodb:UpdateItem
+        - dynamodb:Query
       Resource:
         - ${self:custom.HerosTable.arn}
-
+        - !Join [
+            "/",
+            ["${self:custom.HerosTable.arn}", "index", "statusAndEndDate"],
+          ]
+#Whe need to declare a new arn beacuse when we declare a global index is like a copy from our table
+# The Join sintax is goit to do somethin like this ${self:custom.HerosTable.arn}/index/statusAndEndDate and we need to use with join
 resources:
   Resources:
     HerosTable:
@@ -34,22 +40,22 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
-          # - AttributeName: status
-          #   AttributeType: S
-          # - AttributeName: endingAt
-          #   AttributeType: S
+          - AttributeName: status
+            AttributeType: S
+          - AttributeName: endingAt
+            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-        # GlobalSecondaryIndexes:
-        #   - IndexName: statusAndEndDate
-        #     KeySchema:
-        #       - AttributeName: status
-        #         KeyType: HASH
-        #       - AttributeName: endingAt
-        #         KeyType: RANGE
-        #     Projection: #Dynamo create a virutal copy of the table an use ALL the atributes on the table
-        #       ProjectionType: ALL
+        GlobalSecondaryIndexes:
+          - IndexName: statusAndEndDate
+            KeySchema:
+              - AttributeName: status
+                KeyType: HASH
+              - AttributeName: endingAt
+                KeyType: RANGE
+            Projection: #Dynamo create a virutal copy of the table an use ALL the atributes on the table
+              ProjectionType: ALL
 
   # With Key Schema i'm telling My Attribute id is the key and it is a HASH from string
 functions:

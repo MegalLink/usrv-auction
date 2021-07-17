@@ -1,8 +1,7 @@
+import { getEndedHerosService } from "../services/HeroServices";
 async function scheduleHeroDeadHandler(event, context) {
   console.log("scheduleHeroDead");
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ isDead: true }),
-  };
+
+  return await getEndedHerosService(event);
 }
 export const handler = scheduleHeroDeadHandler;

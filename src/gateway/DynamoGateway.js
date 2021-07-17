@@ -2,7 +2,7 @@ import AWS from "aws-sdk";
 import createError from "http-errors";
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
-export async function put(tableName, data) {
+export async function dynamoPut(tableName, data) {
   console.log("DynamoGateway | put ");
   try {
     await dynamodb
@@ -17,12 +17,12 @@ export async function put(tableName, data) {
   }
 }
 
-export async function get(tableName, key) {
+export async function dynamoGet(tableName, id) {
   console.log("DynamoGateway | get");
-  console.log("DyanamoGateway | get |key", key);
+
   try {
     const result = await dynamodb
-      .get({ TableName: tableName, Key: { id: key } })
+      .get({ TableName: tableName, Key: { id } })
       .promise();
     return result.Item;
   } catch (error) {
@@ -31,7 +31,7 @@ export async function get(tableName, key) {
   }
 }
 
-export async function scan(tableName) {
+export async function dynamoScan(tableName) {
   console.log("DynamoGateway | scan");
   try {
     const result = await dynamodb.scan({ TableName: tableName }).promise();
@@ -41,11 +41,11 @@ export async function scan(tableName) {
     throw new createError.InternalServerError(error);
   }
 }
-export async function update(tableName, key, fieldName, fieldValue) {
+export async function dynamoUpdate(tableName, id, fieldName, fieldValue) {
   console.log("DynamoGateway | update");
   const params = {
     TableName: tableName,
-    Key: { key },
+    Key: { id },
     UpdateExpression: `set ${fieldName} = :value`,
     ExpressionAttributeValues: {
       ":value": fieldValue,
@@ -59,7 +59,7 @@ export async function update(tableName, key, fieldName, fieldValue) {
     throw new createError.InternalServerError(error);
   }
 }
-export async function query(params) {
+export async function dynamoQuery(params) {
   console.log("DynamoGateway | query");
   try {
     const result = await dynamodb.query(params).promise();

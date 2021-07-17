@@ -1,9 +1,15 @@
-import { put, get, scan, update } from "../gateway/DynamoGateway";
+import {
+  dynamoPut,
+  dynamoGet,
+  dynamoScan,
+  dynamoUpdate,
+  dynamoQuery,
+} from "../gateway/DynamoGateway";
 import { v4 as uuid } from "uuid";
 export async function getHeroService(event) {
   console.log("getHeroService init");
   const { id } = event.pathParameters;
-  let hero = await get(process.env.HEROS_TABLE_NAME, id);
+  let hero = await dynamoGet(process.env.HEROS_TABLE_NAME, id);
   if (!hero) {
     throw new createError.NotFound(`Hero with id ${id} not found`);
   }
@@ -15,7 +21,7 @@ export async function getHeroService(event) {
 }
 export async function getHerosService(event) {
   console.log("getHerosService init");
-  let heros = await scan(process.env.HEROS_TABLE_NAME);
+  let heros = await dynamoScan(process.env.HEROS_TABLE_NAME);
   console.log("getHerosService end");
   return {
     statusCode: 200,
@@ -36,10 +42,10 @@ export async function createHeroService(event) {
     status: "OPEN",
     isAlive: true,
     createdAt: now.toISOString(),
-    endDate: endDate.toISOString(),
+    endingAt: endDate.toISOString(),
   };
   console.log(hero);
-  await put(process.env.HEROS_TABLE_NAME, hero);
+  await dynamoPut(process.env.HEROS_TABLE_NAME, hero);
   console.log("createHeroService end");
   return {
     statusCode: 201,
@@ -52,24 +58,35 @@ export async function patchHeroService(event) {
   const { imageUrl } = event.body;
   if (!id) throw new createError.NotFound("id not found");
   if (!imageUrl) throw new createError.NotFound("Image url not found");
-  let response = await update(
-    process.env.HEROS_TABLE_NAME,
-    id,
-    "imageUrl",
-    imageUrl
-  );
-  console.log(response);
+  await dynamoUpdate(process.env.HEROS_TABLE_NAME, id, "imageUrl", imageUrl);
+  let hero = await dynamoGet(process.env.HEROS_TABLE_NAME, id);
   console.log("patchHeroService end");
   return {
     statusCode: 200,
-    body: JSON.stringify(response),
+    body: JSON.stringify(hero),
   };
 }
 
-export async function getEndedHeros(event) {
+export async function getEndedHerosService(event) {
+  console.log("getEndedHeros init");
   const now = new Date();
   const params = {
     TableName: process.env.HEROS_TABLE_NAME,
-    IndexName: "",
+    IndexName: "statusAndEndDate",
+    //We send #status with # because is reserved word see endingAt is not necesary to write #
+    KeyConditionExpression: "#status = :status AND endingAt <= :now",
+    ExpressionAttributeValues: {
+      ":status": "OPEN",
+      ":now": now.toISOString(),
+    },
+    ExpressionAttributeNames: {
+      "#status": "status",
+    },
+  };
+  const heros = await dynamoQuery(params);
+  console.log("getEndedHeros end");
+  return {
+    statusCode: 200,
+    body: JSON.stringify(heros),
   };
 }
