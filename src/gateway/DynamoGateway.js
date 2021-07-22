@@ -41,20 +41,10 @@ export async function dynamoScan(tableName) {
     throw new createError.InternalServerError(error);
   }
 }
-export async function dynamoUpdate(tableName, id, fieldName, fieldValue) {
+export async function dynamoUpdate(params) {
   console.log("DynamoGateway | update");
-  const params = {
-    TableName: tableName,
-    Key: { id },
-    UpdateExpression: `set ${fieldName} = :value`,
-    ExpressionAttributeValues: {
-      ":value": fieldValue,
-    },
-    ReturnValues: "ALL_NEW",
-  };
-
   try {
-    await dynamodb.update(params).promise();
+    return await dynamodb.update(params).promise();
   } catch (error) {
     throw new createError.InternalServerError(error);
   }

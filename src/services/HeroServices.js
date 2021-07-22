@@ -58,7 +58,18 @@ export async function patchHeroService(event) {
   const { imageUrl } = event.body;
   if (!id) throw new createError.NotFound("id not found");
   if (!imageUrl) throw new createError.NotFound("Image url not found");
-  await dynamoUpdate(process.env.HEROS_TABLE_NAME, id, "imageUrl", imageUrl);
+  const params = {
+    TableName: process.env.HEROS_TABLE_NAME,
+    Key: { id },
+    UpdateExpression: `set imageUrl = :value`,
+    ExpressionAttributeValues: {
+      ":value": imageUrl,
+    },
+    ReturnValues: "ALL_NEW",
+  };
+
+  await dynamoUpdate(params);
+
   let hero = await dynamoGet(process.env.HEROS_TABLE_NAME, id);
   console.log("patchHeroService end");
   return {
@@ -83,10 +94,20 @@ export async function getEndedHerosService(event) {
       "#status": "status",
     },
   };
-  const heros = await dynamoQuery(params);
-  console.log("getEndedHeros end");
-  return {
-    statusCode: 200,
-    body: JSON.stringify(heros),
+  return await dynamoQuery(params);
+}
+
+export async function closeEndedHeroService(hero) {
+  const params = {
+    TableName: process.env.HEROS_TABLE_NAME,
+    Key: { id: hero.id },
+    UpdateExpression: "set #status = :status",
+    ExpressionAttributeValues: {
+      ":status": "CLOSED",
+    },
+    ExpressionAttributeNames: {
+      "#status": "status",
+    },
   };
+  return await dynamoUpdate(params);
 }
