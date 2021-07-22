@@ -7,6 +7,7 @@ async function scheduleHeroDeadHandler(event, context) {
   try {
     const herosToClose = await getEndedHerosService(event);
     console.log("HEROS_TO_CLOSE", herosToClose);
+    console.log("ARN", process.env.HEROS_ARN);
     const closePromisses = herosToClose.map((hero) =>
       closeEndedHeroService(hero)
     );

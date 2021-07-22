@@ -14,6 +14,7 @@ provider:
   region: sa-east-1
   environment:
     HEROS_TABLE_NAME: ${self:custom.HerosTable.name}
+    HEROS_ARN: ${self:custom.HerosTable.arn}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -36,6 +37,8 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: HerosTable-${self:provider.stage}
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: id
@@ -58,6 +61,16 @@ resources:
               ProjectionType: ALL
 
   # With Key Schema i'm telling My Attribute id is the key and it is a HASH from string
+  #create a custom object with !Ref i make a reference to
+#Ref can be used with parameters or resources in this case the resource HerosTable and it returns the phisycalID
+#With GettAtt we can access to Attributes
+custom:
+  HerosTable:
+    name: !Ref HerosTable
+    arn: !GetAtt HerosTable.Arn
+  bundle:
+    linting: false
+
 functions:
   createHero:
     handler: src/handlers/CreateHeroHandler.handler
@@ -85,15 +98,11 @@ functions:
           path: /hero/{id}/imageUrl
   scheduleHeroDead:
     handler: src/handlers/ScheduleHeroDeadHandler.handler
-  #  events:
-  #    - schedule: rate(1 minute)
-
-#create a custom object with !Ref i make a reference to
-#Ref can be used with parameters or resources in this case the resource HerosTable and it returns the phisycalID
-#With GettAtt we can access to Attributes
-custom:
-  HerosTable:
-    name: !Ref HerosTable
-    arn: !GetAtt HerosTable.Arn
-  bundle:
-    linting: false
+    events:
+      - schedule: rate(1 minute)
+  syncHeros:
+    handler: src/handlers/SyncHerosHandler.handler
+    events:
+      - stream:
+          type: dynamodb
+          arn: { "Fn::GetAtt": ["HerosTable", "StreamArn"] }
