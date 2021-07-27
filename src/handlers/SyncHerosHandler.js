@@ -1,15 +1,14 @@
 import commonMiddleware from "../core/commonMiddleware";
-import { createHeroService } from "../services/HeroServices";
-
-async function createHeroHandler(event, context) {
-  console.log("Records", event.Records);
-  for (record in event.Records) {
-    console.log("RECORD", record.dynamodb);
+import { syncHeroService } from "../services/SyncService";
+async function syncHeroHandler(event, context) {
+  console.log("SyncHeroHandler");
+  const result = await syncHeroService(event);
+  if (result) {
+    return {
+      statusCode: 200,
+      body: JSON.stringify(result),
+    };
   }
-  return {
-    statusCode: 200,
-    body: "Some Hero has changed",
-  };
 }
 
-export const handler = commonMiddleware(createHeroHandler);
+export const handler = commonMiddleware(syncHeroHandler);

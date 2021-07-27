@@ -13,8 +13,10 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: sa-east-1
   environment:
+    USRV_NAME: ${self:service.name}
     HEROS_TABLE_NAME: ${self:custom.HerosTable.name}
     HEROS_ARN: ${self:custom.HerosTable.arn}
+    HEROS_EVENT_BUS_NAME: ${self:resources.Resources.HerosEventBus.Properties.Name}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -29,10 +31,21 @@ provider:
             "/",
             ["${self:custom.HerosTable.arn}", "index", "statusAndEndDate"],
           ]
+    - Effect: Allow
+      Action:
+        - events:PutEvents
+      Resource:
+        - Fn::GetAtt:
+            - HerosEventBus
+            - Arn
 #Whe need to declare a new arn beacuse when we declare a global index is like a copy from our table
 # The Join sintax is goit to do somethin like this ${self:custom.HerosTable.arn}/index/statusAndEndDate and we need to use with join
 resources:
   Resources:
+    HerosEventBus:
+      Type: AWS::Events::EventBus
+      Properties:
+        Name: HerosEventBus-${self:provider.stage}
     HerosTable:
       Type: AWS::DynamoDB::Table
       Properties:
