@@ -13,6 +13,9 @@ export async function putEvent(detail, eventBusName, source, detailType) {
       },
     ],
   };
+
+  //Estos datos de detail type y source son importantes por que con eso podemos crear la regla para el
+  // even bride algo asi "source":["mi-usrv"],"detail-type":["object"] sino mandamos object entonces no lo caputa al evento
   console.log("EventBridgeGateway Entries", params);
   try {
     return await eventBridge.putEvents(params).promise();
